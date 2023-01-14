@@ -71,7 +71,7 @@ def create_endpoint():
     # Return the short url
     if status_code == 200:
         return {"data": {"short_url": short_url}, "errors": errors, "code": status_code}, status_code
-    return {"data": {}, "errors": errors, "code": status_code}, status_code
+    return {"data": {}, "errors": [errors[0]["message"]], "code": status_code}, status_code
 
 
 @app.route("/delete", methods=["DELETE"])
@@ -81,6 +81,9 @@ def delete_endpoint():
     alias = request.json.get("alias")
     # Get the token from the request body
     token = request.json.get("token")
+
+    alias = alias.split("/")[-1]
+    
 
     errors = []
     # Validate the token
@@ -121,12 +124,14 @@ def create_short_url(url, alias, token):
     status_code = response.status_code
     if status_code == 200:
         return status_code, json["shortUrl"], json.get("errors", None), json.get("code")
-    return status_code, None, json.get("errors", None), json.get("code")
+    return status_code, None, json.get("errors", []), json.get("code")
 
 
 def delete_short_url(alias, token):
     # Get the url id
     url_id = get_link_id(alias, token)
+    if(not url_id):
+        return 404, json.get("errors", ["Given alias does not exist"]), json.get("code")
     # Set the header
     header = {
         'apikey': token,
@@ -140,23 +145,25 @@ def delete_short_url(alias, token):
     # Return the response
     json = response.json()
     status_code = response.status_code
-    return status_code, json.get("errors", None), json.get("code")
-
+    return status_code, json.get("errors", []), json.get("code")
 
 def get_link_id(alias, token):
+
     # Set the header
     header = {
         'apikey': token,
         'content-type': 'application/json'
     }
     # Make the request
-    response = requests.get(BASE_URL + "?domain.fullName=rebrand.ly&slashtag=" + alias, headers=header)
+    response = requests.get(
+        BASE_URL + "?domain.fullName=rebrand.ly&slashtag=" + alias, headers=header)
     # Return the url id
-    json = response.json()
     status_code = response.status_code
     if status_code == 200:
-        return json[0]["id"]
-    return status_code, None, json.get("errors", None), json.get("code")
+        json = response.json()
+        if json:
+            return json[0]["id"]
+    return None
 
 if __name__ == '__main__':
     app.run(host=HOST, port=PORT, debug=True)
