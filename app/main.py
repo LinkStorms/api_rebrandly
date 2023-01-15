@@ -13,11 +13,17 @@ from settings import (
     PORT
 )
 
+template = {
+    "info":{
+        "title": "Rebrandly API",
+        "description": "Rebrandly adapter service to shorten URLs"
+    }
+}
 
 BASE_URL = "https://api.rebrandly.com/v1/links"
 
 app = Flask(__name__)
-swagger = Swagger(app)
+swagger = Swagger(app, template=template)
 
 
 @app.errorhandler(HTTPException)
