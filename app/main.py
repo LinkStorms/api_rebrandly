@@ -70,7 +70,9 @@ def create_endpoint():
     status_code, short_url, errors, code = create_short_url(url, alias, token)
     # Return the short url
     if status_code == 200:
-        return {"data": {"short_url": short_url}, "errors": errors, "code": status_code}, status_code
+        return {"data": {"short_url": short_url}, "errors": [], "code": status_code}, status_code
+    if status_code == 401:
+        return {"data": {}, "errors": errors, "code": status_code}, status_code
     return {"data": {}, "errors": [errors[0]["message"]], "code": status_code}, status_code
 
 
@@ -120,8 +122,11 @@ def create_short_url(url, alias, token):
     # Make the request
     response = requests.post(BASE_URL, json=body, headers=header)
     # Return the short url
-    json = response.json()
     status_code = response.status_code
+    # Unauthorized error being sent in text
+    if status_code == 401:
+        return status_code, None, response.text, status_code
+    json = response.json()
     if status_code == 200:
         return status_code, json["shortUrl"], json.get("errors", None), json.get("code")
     return status_code, None, json.get("errors", []), json.get("code")
