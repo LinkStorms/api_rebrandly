@@ -1,0 +1,101 @@
+Creating a short url with alias if provided, otherwise a random alias
+will be generated
+---
+parameters:
+  - in: body
+    name: url
+    description: Long url to be shortened with Rebrandly.
+    type: object
+    schema:
+        properties:
+            url:
+                type: string
+                in: body
+                example: "https://flask.palletsprojects.com/en/2.2.x/"
+                required: true
+            token:
+                type: string
+                in: body
+                example: "b1ce12a4b1e84ff9bd8782e1805c000b"
+                required: true
+            alias:
+                type: string
+                in: body
+                example: "flask2"
+                required: false
+responses:
+    200:
+        description: Successful operation. Created short url will be returned.
+        schema:
+            properties:
+                code:
+                    type: integer
+                    description: The status code
+                    example: 200
+                data:
+                    type: object
+                    properties:
+                        short_url:
+                            type: string
+                            description: The short url
+                            example: "https://rebrand.ly/flask2"
+                errors:
+                    type: array
+                    items:
+                        type: string
+                    description: The errors
+                    example: []
+    401:
+        description: Not authorized to use to access this API endpoint or resource. Please check your API token
+        schema:
+            properties:
+                code:
+                    type: integer
+                    description: The status code
+                    example: 401
+                data:
+                    type: object
+                    example: {}
+                errors:
+                    type: array
+                    items:
+                        type: string
+                    description: The errors
+                    example: ["Unauthorized"]
+    403:
+        description: Validation failed on one of the properties, please check the errors in the response body.
+        schema:
+            properties:
+                code:
+                    type: integer
+                    description: The status code
+                    example: 403
+                data:
+                    type: object
+                    example: {}
+                errors:
+                    type: array
+                    items:
+                        type: string
+                    description: The errors
+                    example: [
+                        "Already exists",
+                        "Invalid format"
+                    ]
+    5XX:
+        description: There was an unexpected error processing your request.
+        schema:
+            properties:
+                code:
+                    type: integer
+                    description: The status code
+                    example: 5XX
+                data:
+                    type: object
+                    example: {}
+                errors:
+                    type: array
+                    items:
+                        type: string
+                    description: The errors
+                    example: ["Something went wrong"]
