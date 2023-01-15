@@ -84,7 +84,6 @@ def delete_endpoint():
     # Get the token from the request body
     token = request.json.get("token")
 
-    alias = alias.split("/")[-1]
     
 
     errors = []
@@ -101,6 +100,8 @@ def delete_endpoint():
     # Return the errors if any
     if errors:
         return {"data": {}, "errors": errors, "code": 422}, 422
+        
+    alias = alias.split("/")[-1]
 
     # Delete the short url
     status_code, errors, code = delete_short_url(alias, token)
@@ -134,9 +135,11 @@ def create_short_url(url, alias, token):
 
 def delete_short_url(alias, token):
     # Get the url id
-    url_id = get_link_id(alias, token)
+    url_id, response_code = get_link_id(alias, token)
+    if(response_code == 401):
+        return response_code, ["Unauthorized"], response_code
     if(not url_id):
-        return 404, json.get("errors", ["Given alias does not exist"]), json.get("code")
+        return 404, ["Given alias does not exist"], 404
     # Set the header
     header = {
         'apikey': token,
@@ -147,9 +150,8 @@ def delete_short_url(alias, token):
         BASE_URL + "/" + url_id,
         headers=header
     )
-    # Return the response
-    json = response.json()
     status_code = response.status_code
+    json = response.json()
     return status_code, json.get("errors", []), json.get("code")
 
 def get_link_id(alias, token):
@@ -167,8 +169,8 @@ def get_link_id(alias, token):
     if status_code == 200:
         json = response.json()
         if json:
-            return json[0]["id"]
-    return None
+            return json[0]["id"], status_code
+    return None, status_code
 
 if __name__ == '__main__':
     app.run(host=HOST, port=PORT, debug=True)
