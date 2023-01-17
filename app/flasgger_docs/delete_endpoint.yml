@@ -5,7 +5,7 @@ tags:
 parameters:
   - in: body
     name: short_url
-    description: Short url to be deleted from rebrandly.
+    description: Short url to be deleted from Rebrandly.
     type: object
     schema:
         properties:
