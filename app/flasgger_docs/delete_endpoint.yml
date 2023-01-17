@@ -1,16 +1,22 @@
 Deleting a short url by providing its alias.
 ---
 parameters:
-  - name: token
-    type: string
-    in: body
-    example: "b1ce12a4b1e84ff9bd8782e1805c000b"
-    required: true
-  - name: alias
-    type: string
-    in: body
-    example: "flask2"
-    required: true
+  - in: body
+    name: short_url
+    description: Short url to be deleted from rebrandly.
+    type: object
+    schema:
+        properties:
+            token:
+                type: string
+                in: body
+                example: "b1ce12a4b1e84ff9bd8782e1805c000b"
+                required: true
+            alias:
+                type: string
+                in: body
+                example: "flask2"
+                required: true
 responses:
     200:
         description: Successful operation. Short URL deleted successfully.
